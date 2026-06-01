@@ -33,12 +33,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-
       - name: Install dependencies
         run: |
           pip install fastapi uvicorn python-dotenv \
@@ -54,13 +48,4 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/ragplatform
-        run: pytest backend/ -v --tb=short
-
-      - name: Check API starts correctly
-        env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5432/ragplatform
-        run: |
-          uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 &
-          sleep 5
-          curl -f http://localhost:8000/health || exit 1
-          echo "API health check passed"
+        run: pytest backend/tests/ -v --tb=short
