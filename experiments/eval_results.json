@@ -1,0 +1,138 @@
+{
+  "with_reranker": {
+    "reranker": true,
+    "total_questions": 5,
+    "avg_retrieval_recall": 0.1,
+    "avg_answer_accuracy": 0.267,
+    "avg_latency_seconds": 4.92,
+    "results": [
+      {
+        "question": "What is this person's GPA?",
+        "expected": "3.75",
+        "got": "I don't have enough information. The context only provides details about the person's volunteer work",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.5,
+        "latency_seconds": 5.98,
+        "keywords_missing": [
+          "3.75"
+        ]
+      },
+      {
+        "question": "Where does this person go to university?",
+        "expected": "University of Calgary",
+        "got": "I don't have enough information. The context only provides information about the individual's educat",
+        "retrieval_recall": 0.5,
+        "answer_accuracy": 0.5,
+        "latency_seconds": 4.74,
+        "keywords_missing": [
+          "Calgary"
+        ]
+      },
+      {
+        "question": "What degree is this person studying?",
+        "expected": "Bachelor of Engineering",
+        "got": "I don't have enough information to determine the person's current degree or field of study. The cont",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.0,
+        "latency_seconds": 8.55,
+        "keywords_missing": [
+          "Engineering",
+          "Bachelor"
+        ]
+      },
+      {
+        "question": "What award did this person win in 2025?",
+        "expected": "NSERC Undergraduate Student Research Award",
+        "got": "I don't have enough information. The context only provides work experience, education, and extracurr",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.333,
+        "latency_seconds": 5.2,
+        "keywords_missing": [
+          "NSERC",
+          "Research"
+        ]
+      },
+      {
+        "question": "What languages does this person speak?",
+        "expected": "English, Urdu, and Punjabi",
+        "got": "I couldn't find any relevant information.",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.0,
+        "latency_seconds": 0.13,
+        "keywords_missing": [
+          "English",
+          "Urdu",
+          "Punjabi"
+        ]
+      }
+    ]
+  },
+  "without_reranker": {
+    "reranker": false,
+    "total_questions": 5,
+    "avg_retrieval_recall": 0.1,
+    "avg_answer_accuracy": 0.267,
+    "avg_latency_seconds": 3.75,
+    "results": [
+      {
+        "question": "What is this person's GPA?",
+        "expected": "3.75",
+        "got": "I don't have enough information. The context only mentions the person's grades in high school (AP Bi",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.5,
+        "latency_seconds": 4.37,
+        "keywords_missing": [
+          "3.75"
+        ]
+      },
+      {
+        "question": "Where does this person go to university?",
+        "expected": "University of Calgary",
+        "got": "I don't have enough information. The context only provides details about the person's high school ex",
+        "retrieval_recall": 0.5,
+        "answer_accuracy": 0.5,
+        "latency_seconds": 4.34,
+        "keywords_missing": [
+          "Calgary"
+        ]
+      },
+      {
+        "question": "What degree is this person studying?",
+        "expected": "Bachelor of Engineering",
+        "got": "I don't have enough information to determine what degree the person is studying. The context only pr",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.0,
+        "latency_seconds": 5.56,
+        "keywords_missing": [
+          "Engineering",
+          "Bachelor"
+        ]
+      },
+      {
+        "question": "What award did this person win in 2025?",
+        "expected": "NSERC Undergraduate Student Research Award",
+        "got": "I don't have enough information. The context only provides the person's education, clubs, work exper",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.333,
+        "latency_seconds": 4.34,
+        "keywords_missing": [
+          "NSERC",
+          "Research"
+        ]
+      },
+      {
+        "question": "What languages does this person speak?",
+        "expected": "English, Urdu, and Punjabi",
+        "got": "I couldn't find any relevant information.",
+        "retrieval_recall": 0.0,
+        "answer_accuracy": 0.0,
+        "latency_seconds": 0.15,
+        "keywords_missing": [
+          "English",
+          "Urdu",
+          "Punjabi"
+        ]
+      }
+    ]
+  }
+}
