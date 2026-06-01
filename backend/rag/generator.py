@@ -17,15 +17,19 @@ def build_context(chunks: list) -> str:
         )
     return "\n\n".join(context_parts)
 
-
 def generate_answer(query: str, top_k: int = 5,
-                    use_reranker: bool = True) -> dict:
+                    use_reranker: bool = True,
+                    use_hybrid: bool = True) -> dict:
     """
     Full RAG pipeline: retrieve → rerank → generate.
     """
-    # Step 1: Retrieve more candidates than we need
-    retrieval_k = top_k * 2 if use_reranker else top_k
-    chunks = retrieve(query, top_k=retrieval_k)
+    # Step 1: Retrieve
+    if use_hybrid:
+        from rag.retrieval.hybrid_search import hybrid_search
+        chunks = hybrid_search(query, top_k=top_k * 2)
+    else:
+        retrieval_k = top_k * 2 if use_reranker else top_k
+        chunks = retrieve(query, top_k=retrieval_k)
 
     if not chunks:
         return {
@@ -34,14 +38,14 @@ def generate_answer(query: str, top_k: int = 5,
             "chunks_used": 0
         }
 
-    # Step 2: Rerank and take top_k
+    # Step 2: Rerank
     if use_reranker:
         chunks = rerank(query, chunks, top_k=top_k)
 
     # Step 3: Build context
     context = build_context(chunks)
 
-    # Step 4: Generate with Ollama
+    # Step 4: Generate
     prompt = f"""You are a helpful assistant. Answer the question using 
 only the context below. Cite sources like [Source 1].
 If the answer isn't in the context, say "I don't have enough information."
@@ -65,8 +69,9 @@ Answer:"""
         "answer": answer,
         "sources": list(set(c["source"] for c in chunks)),
         "chunks_used": len(chunks),
-        "similarity_scores": [c["similarity"] for c in chunks],
-        "reranked": use_reranker
+        "similarity_scores": [c.get("similarity", 0) for c in chunks],
+        "reranked": use_reranker,
+        "hybrid": use_hybrid
     }
 
 
