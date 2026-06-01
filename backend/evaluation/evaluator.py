@@ -7,51 +7,43 @@ import time
 from rag.retrieval.retriever import retrieve
 from rag.generator import generate_answer
 
-# Golden dataset — questions you KNOW the answers to
-# This is what you benchmark your system against
 GOLDEN_DATASET = [
     {
-        "question": "What is this person's GPA?",
-        "expected_answer": "3.75",
-        "expected_keywords": ["3.75", "GPA"]
+        "question": "What is metamorphic testing?",
+        "expected_answer": "technique to alleviate test oracle problem",
+        "expected_keywords": ["metamorphic", "testing"]
     },
     {
-        "question": "Where does this person go to university?",
-        "expected_answer": "University of Calgary",
-        "expected_keywords": ["Calgary", "University"]
+        "question": "How many LLMs were used in the study?",
+        "expected_answer": "ten LLMs",
+        "expected_keywords": ["ten"]
     },
     {
-        "question": "What degree is this person studying?",
-        "expected_answer": "Bachelor of Engineering",
-        "expected_keywords": ["Engineering", "Bachelor"]
+        "question": "What datasets were used in the experiment?",
+        "expected_answer": "Conala and MBPP",
+        "expected_keywords": ["Conala", "MBPP"]
     },
     {
-        "question": "What award did this person win in 2025?",
-        "expected_answer": "NSERC Undergraduate Student Research Award",
-        "expected_keywords": ["NSERC", "Research", "Award"]
+        "question": "What is a metamorphic relation?",
+        "expected_answer": "expected relationships between input-output pairs",
+        "expected_keywords": ["relation", "input"]
     },
     {
-        "question": "What languages does this person speak?",
-        "expected_answer": "English, Urdu, and Punjabi",
-        "expected_keywords": ["English", "Urdu", "Punjabi"]
+        "question": "What programming language was used in the study?",
+        "expected_answer": "Python",
+        "expected_keywords": ["Python"]
     }
 ]
 
 
 def evaluate_retrieval(question: str, expected_keywords: list,
                        top_k: int = 5) -> dict:
-    """Check if retrieval finds chunks containing expected keywords."""
     chunks = retrieve(question, top_k=top_k)
     combined_text = " ".join([c["text"] for c in chunks]).lower()
-
-    keywords_found = [
-        kw for kw in expected_keywords
-        if kw.lower() in combined_text
-    ]
-
+    keywords_found = [kw for kw in expected_keywords
+                      if kw.lower() in combined_text]
     recall = len(keywords_found) / len(expected_keywords)
     top_similarity = chunks[0]["similarity"] if chunks else 0
-
     return {
         "keywords_found": keywords_found,
         "keywords_missing": [k for k in expected_keywords
@@ -63,24 +55,24 @@ def evaluate_retrieval(question: str, expected_keywords: list,
 
 
 def evaluate_answer(answer: str, expected_keywords: list) -> dict:
-    """Check if the generated answer contains expected keywords."""
     answer_lower = answer.lower()
-    keywords_found = [
-        kw for kw in expected_keywords
-        if kw.lower() in answer_lower
-    ]
+    keywords_found = []
+    for kw in expected_keywords:
+        kw_lower = kw.lower()
+        if kw_lower in answer_lower:
+            keywords_found.append(kw)
+        elif kw.replace(".", "").isdigit() and kw in answer:
+            keywords_found.append(kw)
     accuracy = len(keywords_found) / len(expected_keywords)
-
     return {
         "keywords_found": keywords_found,
         "keywords_missing": [k for k in expected_keywords
-                             if k.lower() not in answer_lower],
+                             if k not in keywords_found],
         "accuracy": round(accuracy, 3)
     }
 
 
 def run_evaluation(use_reranker: bool = True) -> dict:
-    """Run full evaluation suite and return metrics."""
     print(f"\n{'='*60}")
     print(f"Running evaluation (reranker={'ON' if use_reranker else 'OFF'})")
     print(f"{'='*60}\n")
@@ -92,41 +84,31 @@ def run_evaluation(use_reranker: bool = True) -> dict:
 
     for i, item in enumerate(GOLDEN_DATASET):
         print(f"[{i+1}/{len(GOLDEN_DATASET)}] {item['question']}")
-
         start = time.time()
 
-        # Evaluate retrieval
         retrieval_eval = evaluate_retrieval(
-            item["question"],
-            item["expected_keywords"]
-        )
+            item["question"], item["expected_keywords"])
 
-        # Evaluate generation
         result = generate_answer(
-            item["question"],
-            use_reranker=use_reranker
-        )
+            item["question"], use_reranker=use_reranker)
         latency = time.time() - start
 
         answer_eval = evaluate_answer(
-            result["answer"],
-            item["expected_keywords"]
-        )
+            result["answer"], item["expected_keywords"])
 
         total_retrieval_recall += retrieval_eval["recall"]
         total_answer_accuracy += answer_eval["accuracy"]
         total_latency += latency
 
-        result_item = {
+        results.append({
             "question": item["question"],
             "expected": item["expected_answer"],
-            "got": result["answer"][:100],
+            "got": result["answer"][:150],
             "retrieval_recall": retrieval_eval["recall"],
             "answer_accuracy": answer_eval["accuracy"],
             "latency_seconds": round(latency, 2),
             "keywords_missing": answer_eval["keywords_missing"]
-        }
-        results.append(result_item)
+        })
 
         print(f"  Retrieval recall: {retrieval_eval['recall']}")
         print(f"  Answer accuracy:  {answer_eval['accuracy']}")
@@ -148,32 +130,27 @@ def run_evaluation(use_reranker: bool = True) -> dict:
     print(f"  Avg answer accuracy:  {summary['avg_answer_accuracy']}")
     print(f"  Avg latency:          {summary['avg_latency_seconds']}s")
     print(f"{'='*60}\n")
-
     return summary
 
 
 if __name__ == "__main__":
-    # Run with reranker ON
     results_with = run_evaluation(use_reranker=True)
-
-    # Run with reranker OFF
     results_without = run_evaluation(use_reranker=False)
 
-    # Compare
     print("\nRERANKER IMPACT:")
-    print(f"  Accuracy WITH reranker:    "
-          f"{results_with['avg_answer_accuracy']}")
-    print(f"  Accuracy WITHOUT reranker: "
-          f"{results_without['avg_answer_accuracy']}")
-    print(f"  Latency WITH reranker:     "
-          f"{results_with['avg_latency_seconds']}s")
-    print(f"  Latency WITHOUT reranker:  "
-          f"{results_without['avg_latency_seconds']}s")
+    print(f"  Accuracy WITH reranker:    {results_with['avg_answer_accuracy']}")
+    print(f"  Accuracy WITHOUT reranker: {results_without['avg_answer_accuracy']}")
+    print(f"  Latency WITH reranker:     {results_with['avg_latency_seconds']}s")
+    print(f"  Latency WITHOUT reranker:  {results_without['avg_latency_seconds']}s")
 
-    # Save results
-    with open("experiments/eval_results.json", "w") as f:
+    output_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__)))),
+        "experiments", "eval_results.json"
+    )
+    with open(output_path, "w") as f:
         json.dump({
             "with_reranker": results_with,
             "without_reranker": results_without
         }, f, indent=2)
-    print("\nResults saved to experiments/eval_results.json")
+    print(f"\nResults saved to experiments/eval_results.json")

@@ -16,7 +16,7 @@ def load_pdf(file_path: str) -> dict:
     for page_num, page in enumerate(reader.pages):
         text = page.extract_text()
         if text:
-            full_text += text
+            full_text += text.replace('\x00', ' ')
     
     return {
         "source": path.name,

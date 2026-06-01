@@ -2,67 +2,62 @@
   "with_reranker": {
     "reranker": true,
     "total_questions": 5,
-    "avg_retrieval_recall": 0.1,
-    "avg_answer_accuracy": 0.267,
-    "avg_latency_seconds": 4.92,
+    "avg_retrieval_recall": 0.4,
+    "avg_answer_accuracy": 0.3,
+    "avg_latency_seconds": 9.12,
     "results": [
       {
-        "question": "What is this person's GPA?",
-        "expected": "3.75",
-        "got": "I don't have enough information. The context only provides details about the person's volunteer work",
-        "retrieval_recall": 0.0,
-        "answer_accuracy": 0.5,
-        "latency_seconds": 5.98,
+        "question": "What is metamorphic testing?",
+        "expected": "technique to alleviate test oracle problem",
+        "got": "According to [Source 4 - 1-s2.0-S0164121224003741-main.pdf (rerank_score: 4.0004)] and [Source 5 - 1-s2.0-S0164121224003741-main.pdf (rerank_score: 3.",
+        "retrieval_recall": 1.0,
+        "answer_accuracy": 1.0,
+        "latency_seconds": 18.05,
+        "keywords_missing": []
+      },
+      {
+        "question": "How many LLMs were used in the study?",
+        "expected": "ten LLMs",
+        "got": "According to Source 1, which is referenced by multiple sources (e.g., [Source 2] and [Source 3]), a total of seven LLMs were used in the study.",
+        "retrieval_recall": 1.0,
+        "answer_accuracy": 0.0,
+        "latency_seconds": 6.56,
         "keywords_missing": [
-          "3.75"
+          "ten"
         ]
       },
       {
-        "question": "Where does this person go to university?",
-        "expected": "University of Calgary",
-        "got": "I don't have enough information. The context only provides information about the individual's educat",
-        "retrieval_recall": 0.5,
-        "answer_accuracy": 0.5,
-        "latency_seconds": 4.74,
-        "keywords_missing": [
-          "Calgary"
-        ]
-      },
-      {
-        "question": "What degree is this person studying?",
-        "expected": "Bachelor of Engineering",
-        "got": "I don't have enough information to determine the person's current degree or field of study. The cont",
+        "question": "What datasets were used in the experiment?",
+        "expected": "Conala and MBPP",
+        "got": "According to the context, the two publicly available datasets with over 20,000 data pairs used in the experiment are:\n\n[Source 1 - 1-s2.0-S01641212240",
         "retrieval_recall": 0.0,
         "answer_accuracy": 0.0,
-        "latency_seconds": 8.55,
+        "latency_seconds": 7.92,
         "keywords_missing": [
-          "Engineering",
-          "Bachelor"
+          "Conala",
+          "MBPP"
         ]
       },
       {
-        "question": "What award did this person win in 2025?",
-        "expected": "NSERC Undergraduate Student Research Award",
-        "got": "I don't have enough information. The context only provides work experience, education, and extracurr",
+        "question": "What is a metamorphic relation?",
+        "expected": "expected relationships between input-output pairs",
+        "got": "I don't have enough information. The context only mentions \"metamorphic testing\" in the context of testing multiple linear regression systems (Source ",
         "retrieval_recall": 0.0,
-        "answer_accuracy": 0.333,
-        "latency_seconds": 5.2,
+        "answer_accuracy": 0.5,
+        "latency_seconds": 6.93,
         "keywords_missing": [
-          "NSERC",
-          "Research"
+          "input"
         ]
       },
       {
-        "question": "What languages does this person speak?",
-        "expected": "English, Urdu, and Punjabi",
-        "got": "I couldn't find any relevant information.",
+        "question": "What programming language was used in the study?",
+        "expected": "Python",
+        "got": "I don't have enough information to answer that question accurately. The context provides information about various LLM-based code completion framework",
         "retrieval_recall": 0.0,
         "answer_accuracy": 0.0,
-        "latency_seconds": 0.13,
+        "latency_seconds": 6.12,
         "keywords_missing": [
-          "English",
-          "Urdu",
-          "Punjabi"
+          "Python"
         ]
       }
     ]
@@ -70,67 +65,62 @@
   "without_reranker": {
     "reranker": false,
     "total_questions": 5,
-    "avg_retrieval_recall": 0.1,
-    "avg_answer_accuracy": 0.267,
-    "avg_latency_seconds": 3.75,
+    "avg_retrieval_recall": 0.4,
+    "avg_answer_accuracy": 0.3,
+    "avg_latency_seconds": 8.77,
     "results": [
       {
-        "question": "What is this person's GPA?",
-        "expected": "3.75",
-        "got": "I don't have enough information. The context only mentions the person's grades in high school (AP Bi",
-        "retrieval_recall": 0.0,
-        "answer_accuracy": 0.5,
-        "latency_seconds": 4.37,
+        "question": "What is metamorphic testing?",
+        "expected": "technique to alleviate test oracle problem",
+        "got": "Metamorphic testing is a novel approach to alleviating the problem of test oracles by verifying the behavior of systems, particularly in the context o",
+        "retrieval_recall": 1.0,
+        "answer_accuracy": 1.0,
+        "latency_seconds": 20.22,
+        "keywords_missing": []
+      },
+      {
+        "question": "How many LLMs were used in the study?",
+        "expected": "ten LLMs",
+        "got": "I don't have enough information to provide an answer to your question. The context only mentions specific LLMs (e.g., bert2bert, bert2gpt2) and their ",
+        "retrieval_recall": 1.0,
+        "answer_accuracy": 0.0,
+        "latency_seconds": 6.57,
         "keywords_missing": [
-          "3.75"
+          "ten"
         ]
       },
       {
-        "question": "Where does this person go to university?",
-        "expected": "University of Calgary",
-        "got": "I don't have enough information. The context only provides details about the person's high school ex",
-        "retrieval_recall": 0.5,
-        "answer_accuracy": 0.5,
-        "latency_seconds": 4.34,
-        "keywords_missing": [
-          "Calgary"
-        ]
-      },
-      {
-        "question": "What degree is this person studying?",
-        "expected": "Bachelor of Engineering",
-        "got": "I don't have enough information to determine what degree the person is studying. The context only pr",
+        "question": "What datasets were used in the experiment?",
+        "expected": "Conala and MBPP",
+        "got": "According to Source 4 [Source 4 - 1-s2.0-S0164121224003741-main.pdf (rerank_score: 0.852)], two publicly available datasets were used in the experimen",
         "retrieval_recall": 0.0,
         "answer_accuracy": 0.0,
-        "latency_seconds": 5.56,
+        "latency_seconds": 5.64,
         "keywords_missing": [
-          "Engineering",
-          "Bachelor"
+          "Conala",
+          "MBPP"
         ]
       },
       {
-        "question": "What award did this person win in 2025?",
-        "expected": "NSERC Undergraduate Student Research Award",
-        "got": "I don't have enough information. The context only provides the person's education, clubs, work exper",
+        "question": "What is a metamorphic relation?",
+        "expected": "expected relationships between input-output pairs",
+        "got": "I don't have enough information. The provided context does not define or mention \"metamorphic relation.\" It appears to discuss various topics related ",
         "retrieval_recall": 0.0,
-        "answer_accuracy": 0.333,
-        "latency_seconds": 4.34,
+        "answer_accuracy": 0.5,
+        "latency_seconds": 5.64,
         "keywords_missing": [
-          "NSERC",
-          "Research"
+          "input"
         ]
       },
       {
-        "question": "What languages does this person speak?",
-        "expected": "English, Urdu, and Punjabi",
-        "got": "I couldn't find any relevant information.",
+        "question": "What programming language was used in the study?",
+        "expected": "Python",
+        "got": "I don't have enough information to answer your question about the programming language used in the study. The context only provides information about ",
         "retrieval_recall": 0.0,
         "answer_accuracy": 0.0,
-        "latency_seconds": 0.15,
+        "latency_seconds": 5.77,
         "keywords_missing": [
-          "English",
-          "Urdu",
-          "Punjabi"
+          "Python"
         ]
       }
     ]
