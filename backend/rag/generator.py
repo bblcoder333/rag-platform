@@ -69,7 +69,10 @@ Answer:"""
         "answer": answer,
         "sources": list(set(c["source"] for c in chunks)),
         "chunks_used": len(chunks),
-        "similarity_scores": [c.get("similarity", 0) for c in chunks],
+        "similarity_scores": [
+            round(c.get("rerank_score", c.get("rrf_score", c.get("similarity", 0))), 4)
+            for c in chunks
+        ],
         "reranked": use_reranker,
         "hybrid": use_hybrid
     }
