@@ -1,28 +1,16 @@
 import sys
 import os
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import nest_asyncio
-nest_asyncio.apply()
-
-from datasets import Dataset
-from ragas import evaluate
-from ragas.metrics import (
-    faithfulness,
-    answer_relevancy,
-    context_recall,
-    context_precision
-)
+import asyncio
+import json
+from ragas.metrics import Faithfulness, AnswerRelevancy
 from ragas.llms import LangchainLLMWrapper
-from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_community.llms import Ollama
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from rag.retrieval.hybrid_search import hybrid_search
 from rag.generator import generate_answer
-import json
 
-# Golden dataset with reference answers
 GOLDEN_DATASET = [
     {
         "question": "What is metamorphic testing?",
@@ -48,83 +36,57 @@ GOLDEN_DATASET = [
 
 
 def run_ragas_evaluation():
-    print("\nSetting up RAGAS evaluation...")
-    print("This will take a few minutes — RAGAS judges each answer with an LLM\n")
+    print("\nSetting up RAGAS metrics (dict-based API)...")
 
-    # Use Ollama as the judge LLM
-    ollama_llm = LangchainLLMWrapper(
-        Ollama(model="llama3.2", temperature=0)
-    )
+    llm = LangchainLLMWrapper(Ollama(model="llama3.2"))
+    embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en")
 
-    # Use local embeddings
-    hf_embeddings = LangchainEmbeddingsWrapper(
-        HuggingFaceEmbeddings(
-            model_name="BAAI/bge-small-en"
-        )
-    )
+    faithfulness = Faithfulness(llm=llm)
+    relevancy = AnswerRelevancy(llm=llm, embeddings=embeddings)
 
-    # Build evaluation dataset
-    questions = []
-    answers = []
-    contexts = []
-    ground_truths = []
+    faithfulness_scores = []
+    relevancy_scores = []
+    per_question = []
 
     for item in GOLDEN_DATASET:
-        print(f"Generating answer for: {item['question']}")
+        print(f"\nScoring: {item['question']}")
 
-        # Get answer from our RAG system
         result = generate_answer(item["question"], top_k=3)
-
-        # Get retrieved contexts
         chunks = hybrid_search(item["question"], top_k=3)
         context_list = [c["text"] for c in chunks]
 
-        questions.append(item["question"])
-        answers.append(result["answer"])
-        contexts.append(context_list)
-        ground_truths.append(item["ground_truth"])
+        row = {
+            "question": item["question"],
+            "answer": result["answer"],
+            "contexts": context_list,
+            "ground_truth": item["ground_truth"]
+        }
 
-    # Create RAGAS dataset
-    data = {
-        "question": questions,
-        "answer": answers,
-        "contexts": contexts,
-        "ground_truth": ground_truths
-    }
-    dataset = Dataset.from_dict(data)
+        f_score = asyncio.run(faithfulness.ascore(row))
+        r_score = asyncio.run(relevancy.ascore(row))
 
-    print("\nRunning RAGAS evaluation...")
-    print("Metrics: faithfulness, answer_relevancy, context_recall, context_precision\n")
+        print(f"  Faithfulness: {f_score:.3f}  Relevancy: {r_score:.3f}")
 
-    # Run evaluation
-    result = evaluate(
-        dataset=dataset,
-        metrics=[
-            faithfulness,
-            answer_relevancy,
-            context_recall,
-            context_precision
-        ],
-        llm=ollama_llm,
-        embeddings=hf_embeddings
-    )
+        faithfulness_scores.append(f_score)
+        relevancy_scores.append(r_score)
+        per_question.append({
+            "question": item["question"],
+            "faithfulness": f_score,
+            "relevancy": r_score
+        })
+
+    avg_f = sum(faithfulness_scores) / len(faithfulness_scores)
+    avg_r = sum(relevancy_scores) / len(relevancy_scores)
 
     print("\n" + "="*60)
     print("RAGAS RESULTS")
     print("="*60)
-    print(f"  Faithfulness:        {result['faithfulness']:.3f}")
-    print(f"  Answer Relevancy:    {result['answer_relevancy']:.3f}")
-    print(f"  Context Recall:      {result['context_recall']:.3f}")
-    print(f"  Context Precision:   {result['context_precision']:.3f}")
+    print(f"  Avg Faithfulness:     {avg_f:.3f}")
+    print(f"  Avg Answer Relevancy: {avg_r:.3f}")
     print("="*60)
+    print("\nFaithfulness: are answers grounded in retrieved context?")
+    print("Relevancy:    does the answer actually address the question?")
 
-    print("\nWhat these mean:")
-    print("  Faithfulness:      Are answers grounded in retrieved context? (no hallucination)")
-    print("  Answer Relevancy:  Does the answer actually address the question?")
-    print("  Context Recall:    Did retrieval find all necessary information?")
-    print("  Context Precision: Are retrieved chunks relevant to the question?")
-
-    # Save results
     output_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(
             os.path.abspath(__file__)))),
@@ -132,14 +94,11 @@ def run_ragas_evaluation():
     )
     with open(output_path, "w") as f:
         json.dump({
-            "faithfulness": result["faithfulness"],
-            "answer_relevancy": result["answer_relevancy"],
-            "context_recall": result["context_recall"],
-            "context_precision": result["context_precision"]
+            "avg_faithfulness": avg_f,
+            "avg_answer_relevancy": avg_r,
+            "per_question": per_question
         }, f, indent=2)
     print(f"\nResults saved to experiments/ragas_results.json")
-
-    return result
 
 
 if __name__ == "__main__":

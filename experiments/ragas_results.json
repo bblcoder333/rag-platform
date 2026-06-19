@@ -1,6 +1,31 @@
 {
-  "faithfulness": NaN,
-  "answer_relevancy": NaN,
-  "context_recall": NaN,
-  "context_precision": NaN
+  "avg_faithfulness": 0.75,
+  "avg_answer_relevancy": 0.7684906816501085,
+  "per_question": [
+    {
+      "question": "What is metamorphic testing?",
+      "faithfulness": 1.0,
+      "relevancy": 0.9999999999999063
+    },
+    {
+      "question": "How many LLMs were used in the study?",
+      "faithfulness": 0.6666666666666666,
+      "relevancy": 0.0
+    },
+    {
+      "question": "What datasets were used in the experiment?",
+      "faithfulness": 0.75,
+      "relevancy": 0.9773735588239377
+    },
+    {
+      "question": "What is a metamorphic relation?",
+      "faithfulness": 1.0,
+      "relevancy": 0.9999999999999019
+    },
+    {
+      "question": "What programming language was used in the study?",
+      "faithfulness": 0.3333333333333333,
+      "relevancy": 0.8650798494267965
+    }
+  ]
 }
