@@ -49,3 +49,37 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/ragplatform
         run: pytest backend/tests/ -v --tb=short
+
+  retrieval-quality:
+    runs-on: ubuntu-latest
+    needs: test
+    continue-on-error: true  # informational — doesn't block merges yet, needs Ollama in CI
+
+    services:
+      postgres:
+        image: ankane/pgvector
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: ragplatform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Note on retrieval quality tests
+        run: |
+          echo "Retrieval quality tests require Ollama + full ML stack + ingested documents."
+          echo "These run locally as part of the dev workflow (see backend/tests/test_retrieval_quality.py)."
+          echo "Marked continue-on-error since CI runner doesn't have Ollama configured yet."
