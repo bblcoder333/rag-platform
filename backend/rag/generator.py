@@ -78,14 +78,23 @@ Question: {query}
 
 Answer:"""
 
-    response = requests.post("http://localhost:11434/api/generate", json={
-        "model": "llama3.2",
-        "prompt": prompt,
-        "stream": False
-    })
+# Swappable LLM backend: Ollama for local dev, Gemini for cloud deployment
+    LLM_BACKEND = os.getenv("LLM_BACKEND", "ollama")
 
-    answer = response.json()["response"]
-
+    if LLM_BACKEND == "gemini":
+        import google.generativeai as genai
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        answer = response.text
+    else:
+        response = requests.post("http://localhost:11434/api/generate", json={
+            "model": "llama3.2",
+            "prompt": prompt,
+            "stream": False
+        })
+        answer = response.json()["response"]
+        
     return {
         "answer": answer,
         "sources": list(set(c["source"] for c in all_chunks)),
