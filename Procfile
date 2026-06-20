@@ -1,1 +1,1 @@
-web: uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+web: pip install -r requirements-prod.txt && uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
