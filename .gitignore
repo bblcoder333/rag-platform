@@ -7,4 +7,4 @@ __pycache__/
 *.txt
 venv311/
 !requirements.txt
-!requirements-prod.txt
+!requirements-dev.txt
