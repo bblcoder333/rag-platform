@@ -56,6 +56,10 @@ def generate_answer(query: str, top_k: int = 5,
     # Step 2: Rerank merged results against the ORIGINAL query
     if use_reranker:
         all_chunks = rerank(query, all_chunks, top_k=top_k)
+        # Filter out low-relevance chunks that survived reranking but
+        # don't actually belong in context (cross-document contamination guard)
+        MIN_RERANK_SCORE = 0  # cross-encoder scores below 0 are generally irrelevant
+        all_chunks = [c for c in all_chunks if c.get("rerank_score", 1) > MIN_RERANK_SCORE]
     else:
         all_chunks = all_chunks[:top_k]
 
