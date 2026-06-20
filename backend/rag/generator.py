@@ -82,10 +82,12 @@ Answer:"""
     LLM_BACKEND = os.getenv("LLM_BACKEND", "ollama")
 
     if LLM_BACKEND == "gemini":
-        import google.generativeai as genai
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
+        from google import genai
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
         answer = response.text
     else:
         response = requests.post("http://localhost:11434/api/generate", json={
@@ -94,7 +96,7 @@ Answer:"""
             "stream": False
         })
         answer = response.json()["response"]
-        
+
     return {
         "answer": answer,
         "sources": list(set(c["source"] for c in all_chunks)),
