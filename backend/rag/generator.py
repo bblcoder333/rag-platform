@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 from rag.retrieval.retriever import retrieve
 from rag.retrieval.reranker import rerank
-
+from rag.retrieval.query_decomposition import decompose_query
 
 def build_context(chunks: list) -> str:
     context_parts = []
@@ -19,31 +19,48 @@ def build_context(chunks: list) -> str:
 
 def generate_answer(query: str, top_k: int = 5,
                     use_reranker: bool = True,
-                    use_hybrid: bool = True) -> dict:
+                    use_hybrid: bool = True,
+                    use_decomposition: bool = True) -> dict:
     """
-    Full RAG pipeline: retrieve → rerank → generate.
+    Full RAG pipeline: decompose → retrieve → rerank → generate.
     """
-    # Step 1: Retrieve
-    if use_hybrid:
-        from rag.retrieval.hybrid_search import hybrid_search
-        chunks = hybrid_search(query, top_k=top_k * 2)
+    # Step 0: Decompose multi-part questions
+    if use_decomposition:
+        sub_queries = decompose_query(query)
     else:
-        retrieval_k = top_k * 2 if use_reranker else top_k
-        chunks = retrieve(query, top_k=retrieval_k)
+        sub_queries = [query]
 
-    if not chunks:
+    # Step 1: Retrieve for each sub-query, merge results
+    all_chunks = []
+    seen_ids = set()
+
+    for sub_q in sub_queries:
+        if use_hybrid:
+            from rag.retrieval.hybrid_search import hybrid_search
+            chunks = hybrid_search(sub_q, top_k=top_k)
+        else:
+            chunks = retrieve(sub_q, top_k=top_k)
+
+        for chunk in chunks:
+            if chunk["id"] not in seen_ids:
+                all_chunks.append(chunk)
+                seen_ids.add(chunk["id"])
+
+    if not all_chunks:
         return {
             "answer": "I couldn't find any relevant information.",
             "sources": [],
             "chunks_used": 0
         }
 
-    # Step 2: Rerank
+    # Step 2: Rerank merged results against the ORIGINAL query
     if use_reranker:
-        chunks = rerank(query, chunks, top_k=top_k)
+        all_chunks = rerank(query, all_chunks, top_k=top_k)
+    else:
+        all_chunks = all_chunks[:top_k]
 
     # Step 3: Build context
-    context = build_context(chunks)
+    context = build_context(all_chunks)
 
     # Step 4: Generate
     prompt = f"""You are a helpful assistant. Answer the question using 
@@ -67,16 +84,17 @@ Answer:"""
 
     return {
         "answer": answer,
-        "sources": list(set(c["source"] for c in chunks)),
-        "chunks_used": len(chunks),
+        "sources": list(set(c["source"] for c in all_chunks)),
+        "chunks_used": len(all_chunks),
         "similarity_scores": [
             round(c.get("rerank_score", c.get("rrf_score", c.get("similarity", 0))), 4)
-            for c in chunks
+            for c in all_chunks
         ],
         "reranked": use_reranker,
-        "hybrid": use_hybrid
+        "hybrid": use_hybrid,
+        "decomposed": use_decomposition,
+        "sub_queries": sub_queries
     }
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
