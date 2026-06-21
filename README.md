@@ -90,6 +90,34 @@ ollama pull llama3.2
 uvicorn backend.api.main:app --reload --port 8000
 ```
 
+## Deployment
+
+Deployed to Railway with a swappable LLM backend architecture — Ollama for local development, Gemini for cloud deployment (avoiding the need to run a local model server in production).
+
+**Live deployment verification:**
+
+The system was deployed end-to-end and verified working: documents ingested via the `/ingest` endpoint, questions answered via `/ask` with proper source citations, all served through the custom frontend chat UI.
+
+![Live deployment screenshot](docs/screenshots/live-deployment.png)
+
+*The deployment was paused after verification to avoid ongoing trial costs — this is a portfolio project, not a production service requiring 24/7 uptime. The full setup (Procfile, environment-based LLM backend switching, Railway Postgres + pgvector) is documented below for anyone who wants to redeploy it.*
+
+### Deployment setup
+
+```bash
+# Procfile
+web: uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+```
+
+Environment variables required for cloud deployment:
+DATABASE_URL=<Railway Postgres connection string>
+
+LLM_BACKEND=gemini
+
+GEMINI_API_KEY=<your Gemini API key>
+
+Production uses a slim `requirements.txt` (FastAPI, embeddings, pgvector) separate from `requirements-dev.txt` (full local stack including Ollama, RAGAS, evaluation tools) to avoid dependency conflicts and reduce build time on Railway's infrastructure.
+
 ## Usage
 
 ```bash
