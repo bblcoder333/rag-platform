@@ -98,9 +98,9 @@ Deployed to Railway with a swappable LLM backend architecture — Ollama for loc
 
 The system was deployed end-to-end and verified working: documents ingested via the `/ingest` endpoint, questions answered via `/ask` with proper source citations, all served through the custom frontend chat UI.
 
-![Live deployment screenshot](docs/screenshots/live-deployment.png)
-
 *The deployment was paused after verification to avoid ongoing trial costs — this is a portfolio project, not a production service requiring 24/7 uptime. The full setup (Procfile, environment-based LLM backend switching, Railway Postgres + pgvector) is documented below for anyone who wants to redeploy it.*
+
+<!-- Screenshot of live deployment to be added: docs/screenshots/live-deployment.png -->
 
 ### Deployment setup
 
